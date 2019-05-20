@@ -1,7 +1,12 @@
 package edu.cczu.makedecision;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,7 +22,7 @@ import edu.cczu.makedecision.fragment.DecideFragment;
 import edu.cczu.makedecision.fragment.HomeFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements DecideFragment.OnFragmentInteractionListener,HomeFragment.OnFragmentInteractionListener{
+        implements DecideFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener {
 
     protected HomeFragment mFragmentHome = new HomeFragment();
     protected DecideFragment mFragmentDecide = new DecideFragment();
@@ -27,6 +32,17 @@ public class MainActivity extends AppCompatActivity
 
     private List<Fragment> mFragments;
     private FragmentPagerAdapter mAdapter;
+    //摇一摇
+    private SensorManager sensorManager;
+    private Sensor sensor;
+    private Vibrator vibrator;
+    private static final int UPTATE_INTERVAL_TIME = 50;
+    private static final int SPEED_SHRESHOLD = 30;//这个值调节灵敏度
+    private long lastUpdateTime;
+    private float lastX;
+    private float lastY;
+    private float lastZ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +56,8 @@ public class MainActivity extends AppCompatActivity
 //                    .commit();
 //        }
         initView();
-
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
     }
 
@@ -120,4 +137,60 @@ public class MainActivity extends AppCompatActivity
             return this.mList == null ? 0 : this.mList.size();
         }
     }
+
+    @Override
+    protected void onResume() {
+         // TODO Auto-generated method stub
+         super.onResume();
+         if (sensorManager != null) {
+             sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        }
+         if (sensor != null) {
+             sensorManager.registerListener(sensorEventListener,
+                    sensor,
+                    SensorManager.SENSOR_DELAY_GAME);//这里选择感应频率
+
+        }
+    }
+    /**
+     * 重力感应监听
+     */
+    private SensorEventListener sensorEventListener = new SensorEventListener() {
+
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            long currentUpdateTime = System.currentTimeMillis();
+            long timeInterval = currentUpdateTime - lastUpdateTime;
+            if (timeInterval < UPTATE_INTERVAL_TIME) {
+                return;
+            }
+            lastUpdateTime = currentUpdateTime;
+// 传感器信息改变时执行该方法
+            float[] values = event.values;
+            float x = values[0]; // x轴方向的重力加速度，向右为正
+            float y = values[1]; // y轴方向的重力加速度，向前为正
+            float z = values[2]; // z轴方向的重力加速度，向上为正
+            float deltaX = x - lastX;
+            float deltaY = y - lastY;
+            float deltaZ = z - lastZ;
+
+
+            lastX = x;
+            lastY = y;
+            lastZ = z;
+            double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY
+                    + deltaZ * deltaZ) / timeInterval) * 100;
+            if (speed >= SPEED_SHRESHOLD) {
+                vibrator.vibrate(300);
+            }
+        }
+
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
 }

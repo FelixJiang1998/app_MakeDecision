@@ -6,9 +6,12 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,11 +44,18 @@ public class DecideFragment extends Fragment {
     private ChoiceDataSource dataSource;
     private List<Choice> choices;
     private ListView listView;
+    private static final int CONTEXT_MENU_view=0;
+    private static final int CONTEXT_MENU_edit=1;
+    private static final int CONTEXT_MENU_delete=2;
 
 
     private Context mContext;
     private void displayAllChoices() {
         choices = dataSource.findAll();
+        //For test
+        Choice choice=new Choice();
+        choice.setName("1");
+        choices.add(choice);
         ArrayAdapter<Choice> adapter = new ArrayAdapter<>(mContext,android.R.layout.simple_expandable_list_item_1,choices);
         if (listView!=null) listView.setAdapter(adapter);
     }
@@ -95,6 +105,16 @@ public class DecideFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_decide, container, false);
         TextView textView_Category=view.findViewById(R.id.textView_category);
+        listView=view.findViewById(R.id.ListView_choices);
+        listView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(0, CONTEXT_MENU_view, 0, "查看");
+                contextMenu.add(0, CONTEXT_MENU_edit, 1, "编辑");
+                contextMenu.add(0, CONTEXT_MENU_delete, 2, "删除");
+
+            }
+        });
         Button button_decide=view.findViewById(R.id.button_decide);
         Button button_add=view.findViewById(R.id.button_add);
         button_decide.setOnClickListener(new View.OnClickListener() {
@@ -116,10 +136,29 @@ public class DecideFragment extends Fragment {
                 updateChoiceFromInput(choice);
             }
         });
-        listView=view.findViewById(R.id.ListView_choices);
 
+
+        displayAllChoices();
         return view;
     }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int id = (int) info.position;
+        switch (item.getItemId()) {
+            default:
+                return false;
+            case CONTEXT_MENU_view:
+                return true;
+            case CONTEXT_MENU_edit:
+
+            case CONTEXT_MENU_delete:
+
+        }
+        return super.onContextItemSelected(item);
+    }
+
     private void updateChoiceFromInput(final Choice choice) {
         AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
 
