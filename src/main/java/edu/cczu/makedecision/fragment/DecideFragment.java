@@ -19,8 +19,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 import java.util.Random;
 
@@ -52,10 +50,10 @@ public class DecideFragment extends Fragment {
     private Context mContext;
     private void displayAllChoices() {
         choices = dataSource.findAll();
-        //For test
-        Choice choice=new Choice();
-        choice.setName("1");
-        choices.add(choice);
+//        //For test
+//        Choice choice=new Choice();
+//        choice.setName("1");
+//        choices.add(choice);
         ArrayAdapter<Choice> adapter = new ArrayAdapter<>(mContext,android.R.layout.simple_expandable_list_item_1,choices);
         if (listView!=null) listView.setAdapter(adapter);
     }
@@ -93,8 +91,6 @@ public class DecideFragment extends Fragment {
         }
 
         dataSource = new ChoiceDataSource(mContext);
-
-
         displayAllChoices();
 
     }
@@ -115,19 +111,29 @@ public class DecideFragment extends Fragment {
 
             }
         });
+        //Decide Now
         Button button_decide=view.findViewById(R.id.button_decide);
-        Button button_add=view.findViewById(R.id.button_add);
         button_decide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int randPosition = new Random().nextInt(choices.size());
                 Choice selectedChoice = choices.get(randPosition);
-
-                Toast.makeText(mContext,
-                        "Decision has been made!\nGo with " + selectedChoice.getName(),
-                        Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+                TextView textView = new TextView(mContext);
+                textView.setTextSize(24);
+                textView.setText("Decision has been made!\nGo with " + selectedChoice.getName());
+                alert.setView(textView);
+                alert.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+                alert.show();
             }
         });
+
+        //add a choice
+        Button button_add = view.findViewById(R.id.button_add);
         button_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -145,18 +151,22 @@ public class DecideFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int id = (int) info.position;
+        int id = (int) info.id;
+        Choice choice = choices.get(id);
         switch (item.getItemId()) {
             default:
                 return false;
             case CONTEXT_MENU_view:
+                Toast.makeText(getActivity().getApplicationContext(), choice.getName() + "exist", Toast.LENGTH_SHORT);
                 return true;
             case CONTEXT_MENU_edit:
-
+                updateChoiceFromInput(choice);
+                return true;
             case CONTEXT_MENU_delete:
-
+                dataSource.remove(choice);
+                displayAllChoices();
+                return true;
         }
-        return super.onContextItemSelected(item);
     }
 
     private void updateChoiceFromInput(final Choice choice) {
