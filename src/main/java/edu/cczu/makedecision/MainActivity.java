@@ -33,15 +33,7 @@ public class MainActivity extends AppCompatActivity
     private List<Fragment> mFragments;
     private FragmentPagerAdapter mAdapter;
     //摇一摇
-    private SensorManager sensorManager;
-    private Sensor sensor;
-    private Vibrator vibrator;
-    private static final int UPTATE_INTERVAL_TIME = 50;
-    private static final int SPEED_SHRESHOLD = 30;//这个值调节灵敏度
-    private long lastUpdateTime;
-    private float lastX;
-    private float lastY;
-    private float lastZ;
+    private ShakeManager shakeManager;
 
     public static void set_tab(int tab) {
         mViewPager.setCurrentItem(tab);
@@ -51,18 +43,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        //根据传入的Bundle对象判断Activity是正常启动还是销毁重建
-//        if(savedInstanceState == null){
-//            this.getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .add( mFragmentHome,"home")
-//                    .add( mFragmentDecide,"decide").hide(mFragmentDecide)
-//                    .commit();
-//        }
-        initView();
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-
+        if (savedInstanceState==null)
+            initView();
     }
 
     private void initView() {
@@ -98,14 +80,6 @@ public class MainActivity extends AppCompatActivity
         mTabRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                if (checkedId==R.id.index_tab)
-//                    getSupportFragmentManager().beginTransaction()
-//                            .show(mFragmentHome)
-//                            .hide(mFragmentDecide).commit();
-//                if (checkedId==R.id.decide_tab)
-//                    getSupportFragmentManager().beginTransaction()
-//                            .show(mFragmentDecide)
-//                            .hide(mFragmentHome).commit();
                 //用于ViewPager
                 for (int i = 0; i < group.getChildCount(); i++) {
                     if (group.getChildAt(i).getId() == checkedId) {
@@ -115,6 +89,15 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
+        shakeManager=new ShakeManager(this);
+        shakeManager.setShakeListener(new ShakeManager.ShakeListener() {
+            @Override
+            public void onShake() {
+                mFragmentDecide.MakeDecision();
+            }
+        });
+        shakeManager.start();
     }
 
     @Override
@@ -142,59 +125,4 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onResume() {
-         // TODO Auto-generated method stub
-         super.onResume();
-         if (sensorManager != null) {
-             sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        }
-         if (sensor != null) {
-             sensorManager.registerListener(sensorEventListener,
-                    sensor,
-                    SensorManager.SENSOR_DELAY_GAME);//这里选择感应频率
-
-        }
-    }
-    /**
-     * 重力感应监听
-     */
-    private SensorEventListener sensorEventListener = new SensorEventListener() {
-
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            long currentUpdateTime = System.currentTimeMillis();
-            long timeInterval = currentUpdateTime - lastUpdateTime;
-            if (timeInterval < UPTATE_INTERVAL_TIME) {
-                return;
-            }
-            lastUpdateTime = currentUpdateTime;
-// 传感器信息改变时执行该方法
-            float[] values = event.values;
-            float x = values[0]; // x轴方向的重力加速度，向右为正
-            float y = values[1]; // y轴方向的重力加速度，向前为正
-            float z = values[2]; // z轴方向的重力加速度，向上为正
-            float deltaX = x - lastX;
-            float deltaY = y - lastY;
-            float deltaZ = z - lastZ;
-
-
-            lastX = x;
-            lastY = y;
-            lastZ = z;
-            double speed = (Math.sqrt(deltaX * deltaX + deltaY * deltaY
-                    + deltaZ * deltaZ) / timeInterval) * 100;
-            if (speed >= SPEED_SHRESHOLD) {
-                vibrator.vibrate(300);
-            }
-        }
-
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-        }
-    };
 }

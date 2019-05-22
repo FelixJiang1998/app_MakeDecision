@@ -43,22 +43,20 @@ public class DecideFragment extends Fragment {
     private ChoiceDataSource dataSource;
     private List<Choice> choices;
     private ListView listView;
-    private static final int CONTEXT_MENU_view=0;
-    private static final int CONTEXT_MENU_edit=1;
-    private static final int CONTEXT_MENU_delete=2;
+    private static final int CONTEXT_MENU_view = 0;
+    private static final int CONTEXT_MENU_edit = 1;
+    private static final int CONTEXT_MENU_delete = 2;
 
     private SharedPreferences titlePref;
 
     private Context mContext;
+
     private void displayAllChoices() {
         choices = dataSource.findAll();
-//        //For test
-//        Choice choice=new Choice();
-//        choice.setName("1");
-//        choices.add(choice);
-        ArrayAdapter<Choice> adapter = new ArrayAdapter<>(mContext,android.R.layout.simple_expandable_list_item_1,choices);
-        if (listView!=null) listView.setAdapter(adapter);
+        ArrayAdapter<Choice> adapter = new ArrayAdapter<>(mContext, android.R.layout.simple_expandable_list_item_1, choices);
+        if (listView != null) listView.setAdapter(adapter);
     }
+
     private OnFragmentInteractionListener mListener;
 
     public DecideFragment() {
@@ -107,7 +105,7 @@ public class DecideFragment extends Fragment {
         final TextView textView_Event = view.findViewById(R.id.textView_Event);
         if (titlePref != null)
             textView_Event.setText(titlePref.getString("title", "吃什么"));
-        listView=view.findViewById(R.id.ListView_choices);
+        listView = view.findViewById(R.id.ListView_choices);
         listView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override
             public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
@@ -118,7 +116,7 @@ public class DecideFragment extends Fragment {
             }
         });
         //Decide Now
-        Button button_decide=view.findViewById(R.id.button_decide);
+        Button button_decide = view.findViewById(R.id.button_decide);
         button_decide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -257,7 +255,7 @@ public class DecideFragment extends Fragment {
         input.setText(choice.getName());
         alert.setView(input);
 
-        alert.setPositiveButton("Save",new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String updatedName = input.getText().toString();
                 choice.setName(updatedName);
@@ -266,8 +264,8 @@ public class DecideFragment extends Fragment {
             }
         });
 
-        alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int id) {
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
                 // if this button is clicked, just close
                 // the dialog box and do nothing
                 dialog.cancel();
@@ -292,6 +290,24 @@ public class DecideFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    public void MakeDecision() {
+        if (choices.size() > 0) {
+            int randPosition = new Random().nextInt(choices.size());
+            Choice selectedChoice = choices.get(randPosition);
+            AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+            TextView textView = new TextView(mContext);
+            textView.setTextSize(24);
+            textView.setText("Decision has been made!\n\t\tGo with " + selectedChoice.getName());
+            alert.setView(textView);
+            alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            alert.show();
         }
     }
 
