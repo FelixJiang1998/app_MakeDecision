@@ -11,35 +11,55 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="90dp"
         android:text="Add"
-        app:layout_constraintBottom_toBottomOf="@+id/button_decide"
-        app:layout_constraintEnd_toEndOf="@+id/ListView_choices"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="@+id/guideline3"
-        app:layout_constraintTop_toTopOf="@+id/button_decide" />
+        app:layout_constraintTop_toBottomOf="@+id/ListView_choices" />
+
+    <Button
+        android:id="@+id/button_clearAll"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Clear All"
+        app:layout_constraintBottom_toBottomOf="@+id/button_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_add"
+        app:layout_constraintTop_toTopOf="@+id/button_add" />
 
     <Button
         android:id="@+id/button_decide"
         android:layout_width="88dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="121dp"
         android:text="Decide"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline3"
-        app:layout_constraintStart_toStartOf="@+id/ListView_choices"
-        app:layout_constraintTop_toBottomOf="@+id/ListView_choices"
-        app:layout_constraintVertical_bias="0.39" />
+        app:layout_constraintBottom_toBottomOf="@+id/button_add"
+        app:layout_constraintEnd_toStartOf="@+id/button_add"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button_add" />
+
+    <Button
+        android:id="@+id/button_modifyTitle"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Modify"
+        app:layout_constraintBottom_toBottomOf="@+id/textView_Event"
+        app:layout_constraintStart_toEndOf="@+id/textView_Event"
+        app:layout_constraintTop_toTopOf="@+id/textView_Event" />
 
     <TextView
-        android:id="@+id/textView_category"
+        android:id="@+id/textView_Event"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginTop="8dp"
-        android:text="吃什么"
         android:textSize="30sp"
         app:layout_constraintStart_toStartOf="@+id/textView_title"
         app:layout_constraintTop_toBottomOf="@+id/textView_title" />
@@ -64,7 +84,7 @@
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_category" />
+        app:layout_constraintTop_toBottomOf="@+id/textView_Event" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline3"

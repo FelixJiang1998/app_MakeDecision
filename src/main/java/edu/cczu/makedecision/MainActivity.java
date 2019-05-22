@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity
     protected HomeFragment mFragmentHome = new HomeFragment();
     protected DecideFragment mFragmentDecide = new DecideFragment();
 
-    private ViewPager mViewPager;
+    private static ViewPager mViewPager;
     private RadioGroup mTabRadioGroup;
 
     private List<Fragment> mFragments;
@@ -42,6 +42,10 @@ public class MainActivity extends AppCompatActivity
     private float lastX;
     private float lastY;
     private float lastZ;
+
+    public static void set_tab(int tab) {
+        mViewPager.setCurrentItem(tab);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +109,7 @@ public class MainActivity extends AppCompatActivity
                 //用于ViewPager
                 for (int i = 0; i < group.getChildCount(); i++) {
                     if (group.getChildAt(i).getId() == checkedId) {
-                        mViewPager.setCurrentItem(i);
+                        set_tab(i);
                         return;
                     }
                 }

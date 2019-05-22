@@ -7,7 +7,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import edu.cczu.makedecision.MainActivity;
 import edu.cczu.makedecision.R;
 
 /**
@@ -23,6 +30,15 @@ public class HomeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private static final int CONTEXT_MENU_view = 10;
+    private static final int CONTEXT_MENU_edit = 11;
+    private static final int CONTEXT_MENU_delete = 12;
+    ArrayAdapter<String> arrayAdapter_event;
+    private ArrayList<String> events;
+    private Context mContext;
+    private String event1 = "吃什么";
+    private String event2 = "Yes or No";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -55,9 +71,10 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = getActivity();
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -65,6 +82,34 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        ListView listView = view.findViewById(R.id.ListView_events);
+        ArrayList<String> events = new ArrayList<>();
+        events.add(event1);
+        events.add(event2);
+        arrayAdapter_event = new ArrayAdapter<>(getActivity(), android.R.layout.simple_expandable_list_item_1, events);
+        listView.setAdapter(arrayAdapter_event);
+//        listView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+//            @Override
+//            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+//                contextMenu.add(0, CONTEXT_MENU_view, 0, "查看");
+//                contextMenu.add(0, CONTEXT_MENU_edit, 1, "编辑");
+//                contextMenu.add(0, CONTEXT_MENU_delete, 2, "删除");
+//            }
+//        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MainActivity.set_tab(2);
+                switch (i) {
+                    case 0:
+                        Toast.makeText(getActivity(), "吃什么", Toast.LENGTH_SHORT).show();
+                    case 1:
+                        Toast.makeText(getActivity(), "Yes Or No", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -74,6 +119,48 @@ public class HomeFragment extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+//        int id = info.position;
+//        String event = events.get(id);
+//        switch (item.getItemId()) {
+//            default:
+//                return false;
+//            case CONTEXT_MENU_view:
+//                Toast.makeText(mContext.getApplicationContext(), event, Toast.LENGTH_SHORT);
+//                return true;
+//            case CONTEXT_MENU_edit:
+//                AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+//
+//                final EditText input = new EditText(mContext);
+//                input.setText(event);
+//                alert.setView(input);
+//
+//                alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//                        String updatedName = input.getText().toString();
+//                        event1 = updatedName;
+//                    }
+//                });
+//
+//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        // if this button is clicked, just close
+//                        // the dialog box and do nothing
+//                        dialog.cancel();
+//                    }
+//                });
+//
+//                alert.show();
+//                return true;
+//            case CONTEXT_MENU_delete:
+//                events.remove(event);
+//                arrayAdapter_event.notifyDataSetChanged();
+//                return true;
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {

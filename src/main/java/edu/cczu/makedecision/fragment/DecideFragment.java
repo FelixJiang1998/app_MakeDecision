@@ -3,6 +3,7 @@ package edu.cczu.makedecision.fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -46,6 +47,7 @@ public class DecideFragment extends Fragment {
     private static final int CONTEXT_MENU_edit=1;
     private static final int CONTEXT_MENU_delete=2;
 
+    private SharedPreferences titlePref;
 
     private Context mContext;
     private void displayAllChoices() {
@@ -84,14 +86,16 @@ public class DecideFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext=getActivity();
+        mContext = getActivity();
+        dataSource = new ChoiceDataSource(mContext);
+        titlePref = dataSource.getTitlePrefs();
         if (getArguments() != null) {
 //            mParam1 = getArguments().getString(ARG_PARAM1);
 //            mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        dataSource = new ChoiceDataSource(mContext);
-        displayAllChoices();
+
+//        displayAllChoices();
 
     }
 
@@ -100,7 +104,9 @@ public class DecideFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_decide, container, false);
-        TextView textView_Category=view.findViewById(R.id.textView_category);
+        final TextView textView_Event = view.findViewById(R.id.textView_Event);
+        if (titlePref != null)
+            textView_Event.setText(titlePref.getString("title", "吃什么"));
         listView=view.findViewById(R.id.ListView_choices);
         listView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
             @Override
@@ -116,19 +122,33 @@ public class DecideFragment extends Fragment {
         button_decide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int randPosition = new Random().nextInt(choices.size());
-                Choice selectedChoice = choices.get(randPosition);
-                AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
-                TextView textView = new TextView(mContext);
-                textView.setTextSize(24);
-                textView.setText("Decision has been made!\nGo with " + selectedChoice.getName());
-                alert.setView(textView);
-                alert.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-                alert.show();
+                if (choices.size() > 0) {
+                    int randPosition = new Random().nextInt(choices.size());
+                    Choice selectedChoice = choices.get(randPosition);
+                    AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+                    TextView textView = new TextView(mContext);
+                    textView.setTextSize(24);
+                    textView.setText("Decision has been made!\n\t\tGo with " + selectedChoice.getName());
+                    alert.setView(textView);
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+                    alert.show();
+                } else {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+                    TextView textView = new TextView(mContext);
+                    textView.setTextSize(24);
+                    textView.setText("Please add a choice before you make a decision!");
+                    alert.setView(textView);
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+                    alert.show();
+                }
             }
         });
 
@@ -143,6 +163,67 @@ public class DecideFragment extends Fragment {
             }
         });
 
+        //modify the title
+        Button button_modifyTitle = view.findViewById(R.id.button_modifyTitle);
+        button_modifyTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+
+                final EditText input = new EditText(mContext);
+                input.setText(textView_Event.getText());
+                alert.setView(input);
+
+                alert.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String updatedTitle = input.getText().toString();
+                        textView_Event.setText(updatedTitle);
+                        SharedPreferences.Editor editor = titlePref.edit();
+                        editor.putString("title", updatedTitle);
+                        editor.commit();
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, just close the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
+                alert.show();
+
+
+            }
+        });
+
+        //clear all
+        Button button_clearAll = view.findViewById(R.id.button_clearAll);
+        button_clearAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+
+                TextView title = new TextView(mContext);
+                title.setText("Are you sure to clear all?");
+                title.setTextSize(24);
+                alert.setView(title);
+
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        for (Choice choice : choices)
+                            dataSource.remove(choice);
+                        displayAllChoices();
+                    }
+                });
+                alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, just close the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
+
+                alert.show();
+            }
+        });
 
         displayAllChoices();
         return view;

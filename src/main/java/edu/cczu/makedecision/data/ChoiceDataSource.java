@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ChoiceDataSource {
-	private static final String PREFKEY = "choices";
+	private static final String PREFKEY_choices = "choices";
+	private static final String PREFKEY_title = "title";
+
 	private SharedPreferences choicePrefs;
-	
+	private SharedPreferences titlePrefs;
 	public ChoiceDataSource(Context context) {
-		choicePrefs = context.getSharedPreferences(PREFKEY, Context.MODE_PRIVATE);
+		choicePrefs = context.getSharedPreferences(PREFKEY_choices, Context.MODE_PRIVATE);
+		titlePrefs = context.getSharedPreferences(PREFKEY_title, Context.MODE_PRIVATE);
 	}
 	
 	public List<Choice> findAll() {
@@ -27,7 +30,10 @@ public class ChoiceDataSource {
 		
 		return choiceList;
 	}
-	
+
+	public SharedPreferences getTitlePrefs() {
+		return titlePrefs;
+	}
 	public boolean save(Choice choice) {
 		SharedPreferences.Editor editor = choicePrefs.edit();
 		editor.putString(choice.getId(), choice.getName());
